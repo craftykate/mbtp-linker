@@ -1,20 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { MantineProvider } from "@mantine/core";
-import { ColorSchemeScript } from "@mantine/core";
+import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import { theme } from "@/theme";
 import "@mantine/core/styles.css";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Easy MBTP Linker",
@@ -27,7 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-mantine-color-scheme="light">
+      {" "}
+      {/* data-mantine-color-scheme tag added to suppress mantine hydration bug error */}
       <head>
         <meta
           name="viewport"
@@ -35,7 +25,7 @@ export default function RootLayout({
         />
         <ColorSchemeScript />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>
         <MantineProvider theme={theme}>{children}</MantineProvider>
       </body>
     </html>
