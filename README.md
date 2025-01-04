@@ -13,3 +13,5 @@ I also added links to a couple of my education apps at the bottom - the site I b
 ## Usage
 
 Simple! Open https://mbtp-linker.vercel.app and type in the number part of your mbtp link. Or choose from the links on the page to open.
+
+![thumbnail of the site](https://mbtp-linker.vercel.app/thumbnail.png)
