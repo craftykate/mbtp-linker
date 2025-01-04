@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Easy MBTP Linker",
   description: "Quick links to MBTP resources",
   appleWebApp: {
-    capable: true,
+    capable: false,
     title: "Easy MBTP Linker",
     statusBarStyle: "default",
   },
