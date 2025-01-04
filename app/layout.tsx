@@ -16,7 +16,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-mantine-color-scheme="light">
-      {" "}
       {/* data-mantine-color-scheme tag added to suppress mantine hydration bug error */}
       <head>
         <meta
