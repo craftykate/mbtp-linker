@@ -1,36 +1,15 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Easy MBTP Linker
 
-## Getting Started
+Easy way to open MBTP links, plus some common and helpful links
 
-First, run the development server:
+## Introduction
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Typing out the whole link every time we need to watch a video or open a game is annoying. Even tabbing through the autocomplete in the url bar is frustrating. Since just the last part of the url changes I thought it would be nice to have a little utility for easily opening the links.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+And because I don't like finding the Learning Gates quiz site several times a week (or leaving the tab open all the time) I decided to link to the quiz site and the online curriculum area. From one site you can easily open today's mbtp link, launch the quiz, and open the online curriculum area in case you need to print something out.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+I also added links to a couple of my education apps at the bottom - the site I built for practicing phone numbers and the site I built for practicing sorting numbers. I may add more helpful links to the bottom from other sources as well.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Usage
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Simple! Open https://mbtp-linker.vercel.app and type in the number part of your mbtp link. Or choose from the links on the page to open.
