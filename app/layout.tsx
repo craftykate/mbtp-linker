@@ -15,11 +15,6 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Easy MBTP Linker",
   description: "Quick links to MBTP resources",
-  appleWebApp: {
-    capable: false,
-    title: "Easy MBTP Linker",
-    statusBarStyle: "default",
-  },
   openGraph: {
     title: "Easy MBTP Linker",
     description: "Quick links to MBTP resources",
