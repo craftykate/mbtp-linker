@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import { theme } from "@/theme";
 import "@mantine/core/styles.css";
@@ -54,7 +55,10 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          {children}
+          <Analytics />
+        </MantineProvider>
       </body>
     </html>
   );
