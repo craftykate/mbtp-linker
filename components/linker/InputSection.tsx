@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Button, Group, Input, NumberInput, Stack, Text } from "@mantine/core";
 import { isNotEmpty, useForm } from "@mantine/form";
 import { useFocusTrap } from "@mantine/hooks";
+import { useSavedLinksContext } from "@/store/settings";
 import { IconExternalLink } from "@tabler/icons-react";
 
 export default function InputSection() {
+  const { addSavedLink } = useSavedLinksContext();
+
   const focusTrapRef = useFocusTrap();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,8 +32,9 @@ export default function InputSection() {
   });
 
   const handleSubmit = (values: { linkSuffix: string }) => {
-    console.log(values);
-    window.open(`https://www.beyondthepage.com/link/${values.linkSuffix}`);
+    const url = `https://www.beyondthepage.com/link/${values.linkSuffix}`;
+    window.open(url);
+    addSavedLink(values.linkSuffix, url);
     setIsSubmitting(false);
     form.reset();
   };
