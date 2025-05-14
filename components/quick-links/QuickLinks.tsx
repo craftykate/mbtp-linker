@@ -8,16 +8,14 @@ export default function QuickLinks() {
       <Button
         variant="light"
         onClick={() =>
-          window.open("https://www.movingbeyondthepage.com/learning-gate/")
+          window.open("https://www.beyondthepage.com/learning-gate/")
         }
       >
         Learning Gates
       </Button>
       <Button
         variant="light"
-        onClick={() =>
-          window.open("https://www.movingbeyondthepage.com/online/")
-        }
+        onClick={() => window.open("https://www.beyondthepage.com/online/")}
       >
         Online Curriculum
       </Button>

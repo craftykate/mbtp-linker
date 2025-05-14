@@ -7,7 +7,7 @@ export default function Footer() {
         &copy; {new Date().getFullYear()} Easy MBTP Linker. All rights reserved.
         Site built by Kate McFaul.
       </Text>
-      <Text size="sm">Not affiliated with Moving Beyond the Page.</Text>
+      <Text size="sm">Not affiliated with Beyond the Page.</Text>
     </Box>
   );
 }

@@ -30,9 +30,7 @@ export default function InputSection() {
 
   const handleSubmit = (values: { linkSuffix: string }) => {
     console.log(values);
-    window.open(
-      `https://www.movingbeyondthepage.com/link/${values.linkSuffix}`
-    );
+    window.open(`https://www.beyondthepage.com/link/${values.linkSuffix}`);
     setIsSubmitting(false);
     form.reset();
   };
@@ -77,7 +75,7 @@ export default function InputSection() {
         </Group>
         <Text>
           <Text span c="dimmed" fs="italic">
-            www.movingbeyondthepage.com/link/
+            www.beyondthepage.com/link/
           </Text>
           <Text span c="red">
             12345
