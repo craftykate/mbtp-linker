@@ -4,6 +4,7 @@ import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import { theme } from "@/theme";
 import "@mantine/core/styles.css";
 import "./globals.css";
+import { SavedLinksContextProvider } from "@/store/settings";
 
 export const viewport: Viewport = {
   minimumScale: 1,
@@ -50,10 +51,12 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider theme={theme}>
-          {children}
-          <Analytics />
-        </MantineProvider>
+        <SavedLinksContextProvider>
+          <MantineProvider theme={theme}>
+            {children}
+            <Analytics />
+          </MantineProvider>
+        </SavedLinksContextProvider>
       </body>
     </html>
   );
