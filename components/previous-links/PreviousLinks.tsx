@@ -9,15 +9,30 @@ import {
   ActionIcon,
   Tooltip,
 } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
+import { IconExternalLink, IconTrash } from "@tabler/icons-react";
 import { useSavedLinksContext } from "@/store/settings";
 
 export default function PreviousLinks() {
-  const { savedLinks, removeSavedLink } = useSavedLinksContext();
+  const { savedLinks, removeSavedLink, updateAllLinks } =
+    useSavedLinksContext();
 
   if (savedLinks.length === 0) {
     return null;
   }
+
+  // Move link to top of saved links, updating date to today
+  const bumpLink = (index: number) => {
+    const link = savedLinks[index];
+    link.date = new Date().toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "long",
+      day: "numeric",
+    });
+    const updatedLinks = [...savedLinks];
+    updatedLinks.splice(index, 1);
+    updatedLinks.unshift(savedLinks[index]);
+    updateAllLinks(updatedLinks);
+  };
 
   return (
     <>
@@ -29,19 +44,30 @@ export default function PreviousLinks() {
         size="xs"
       />
       <Stack gap="xs">
-        {savedLinks.map(({ id, href, label, date }) => (
-          <Group key={id} justify="space-between">
+        {savedLinks.map((link, index) => (
+          <Group key={link.id} justify="space-between">
             <Group justify="flex-start" gap="0.2rem">
-              <Anchor href={href} target="_blank">
-                {label}
+              <Anchor
+                href={link.href}
+                target="_blank"
+                onClick={() => bumpLink(index)}
+              >
+                <ActionIcon
+                  variant="transparent"
+                  size="xs"
+                  style={{ top: "3px" }}
+                >
+                  <IconExternalLink />
+                </ActionIcon>
+                {link.label}
               </Anchor>{" "}
-              - {date}
+              - {link.date}
             </Group>
             <Tooltip label="Delete Link">
               <ActionIcon
                 variant="transparent"
                 size="sm"
-                onClick={() => removeSavedLink(id)}
+                onClick={() => removeSavedLink(link.id)}
               >
                 <IconTrash />
               </ActionIcon>
