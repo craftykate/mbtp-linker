@@ -16,6 +16,7 @@ interface SavedLinksContextType {
   savedLinks: SavedLinkType[];
   addSavedLink: (suffix: string, url: string) => void;
   removeSavedLink: (id: string) => void;
+  updateAllLinks: (links: SavedLinkType[]) => void;
 }
 
 // INITIAL DEFAULT VALUES
@@ -26,6 +27,7 @@ export const SavedLinksContext = createContext<SavedLinksContextType>({
   savedLinks: defaultLinks,
   addSavedLink: () => {},
   removeSavedLink: () => {},
+  updateAllLinks: () => {},
 });
 
 // CUSTOM HOOK TO ACCESS THE CONTEXT
@@ -77,6 +79,10 @@ export function SavedLinksContextProvider({
     const updatedLinks = storedInfo.filter((link) => link.id !== id);
     setStoredInfo(updatedLinks);
   };
+
+  const updateAllLinks = (links: SavedLinkType[]) => {
+    setStoredInfo(links);
+  };
   //=========== End Context Functions ===========
 
   //=========== Define Context Value ===========
@@ -84,6 +90,7 @@ export function SavedLinksContextProvider({
     savedLinks,
     addSavedLink,
     removeSavedLink,
+    updateAllLinks,
   };
 
   return (
