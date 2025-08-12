@@ -9,6 +9,8 @@ import {
   Button,
   Divider,
   Text,
+  Anchor,
+  Image,
 } from "@mantine/core";
 import { isNotEmpty, useForm } from "@mantine/form";
 import { IconSearch } from "@tabler/icons-react";
@@ -86,6 +88,24 @@ export default function Dictionary() {
         </Stack>
       </form>
       {result && <Results result={result} />}
+      <Group justify="flex-end" align="center" mt="md" gap="xs">
+        <Text size="xs" c="dimmed">
+          Definitions & synonyms from
+        </Text>
+        <Anchor
+          href="https://www.merriam-webster.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Merriam-Webster"
+        >
+          <Image
+            src="/images/MWLogo_LightBG_120x120_2x.png"
+            width={50}
+            height={50}
+            alt="Merriam-Webster®"
+          />
+        </Anchor>
+      </Group>
     </>
   );
 }
