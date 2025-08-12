@@ -12,9 +12,10 @@ import {
   Anchor,
   Image,
   Box,
+  ActionIcon,
 } from "@mantine/core";
 import { isNotEmpty, useForm } from "@mantine/form";
-import { IconSearch } from "@tabler/icons-react";
+import { IconSearch, IconX } from "@tabler/icons-react";
 import { DefineResult } from "@/types/dictionary";
 import Results from "./Results";
 
@@ -88,6 +89,15 @@ export default function Dictionary() {
           </Group>
         </Stack>
       </form>
+      {result && (
+        <Group align="center" gap="0">
+          <ActionIcon onClick={() => setResult(null)} variant="transparent">
+            <IconX />
+          </ActionIcon>{" "}
+          <Text size="xl">{result.word}</Text>
+        </Group>
+      )}
+
       {result && <Results result={result} />}
       <Group justify="flex-end" align="center" mt="md" gap="xs" wrap="nowrap">
         <Text
