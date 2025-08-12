@@ -1,14 +1,21 @@
 type ApiResult = {
   word: string;
-  entries: Array<{ fl: string; definitions: string[] }>;
+  entries: Array<{
+    fl: string;
+    definitions: string[];
+    pronunciation?: { mw?: string; audioUrl?: string };
+  }>;
   synonymsByPartOfSpeech: Array<{ fl: string; synonyms: string[] }>;
   suggestions: string[];
 };
 
+// ---- Minimal MW shapes we use ----
+type MWPron = { mw?: unknown; sound?: { audio?: unknown } };
 type MWDictEntry = {
   fl?: unknown; // part of speech
   shortdef?: unknown; // string[]
   meta?: { id?: unknown } | unknown;
+  hwi?: { prs?: unknown }; // pronunciations (array of MWPron)
 };
 
 type MWThesEntry = {
@@ -16,6 +23,7 @@ type MWThesEntry = {
   def?: Array<{ sseq?: unknown }>;
 };
 
+// ---- Tiny guards/utilities ----
 const isObject = (x: unknown): x is Record<string, unknown> =>
   typeof x === "object" && x !== null;
 
@@ -32,28 +40,85 @@ const isMWDictEntryArray = (x: unknown): x is MWDictEntry[] =>
 const isMWThesEntryArray = (x: unknown): x is MWThesEntry[] =>
   Array.isArray(x) && x.every(isMWThesEntry);
 
-// ---- Dictionary: collect all shortdefs grouped by part of speech ----
-function extractAllDefsByPOS(
-  json: unknown
-): Array<{ fl: string; definitions: string[] }> {
+// Build Merriam-Webster audio URL from token per their folder rules
+function audioUrlFromToken(token: string): string {
+  const folder = token.startsWith("bix")
+    ? "bix"
+    : token.startsWith("gg")
+    ? "gg"
+    : /^\d/.test(token)
+    ? "number"
+    : token[0];
+  return `https://media.merriam-webster.com/audio/prons/en/us/mp3/${folder}/${token}.mp3`;
+}
+
+// First usable pronunciation on an entry (respelling + audio URL)
+function firstPron(
+  e: MWDictEntry
+): { mw?: string; audioUrl?: string } | undefined {
+  const prs = (e.hwi as { prs?: unknown } | undefined)?.prs;
+  if (!Array.isArray(prs)) return undefined;
+
+  for (const p of prs as MWPron[]) {
+    const mwRaw = (p as { mw?: unknown }).mw;
+    const tokenRaw = (p as { sound?: { audio?: unknown } }).sound?.audio;
+
+    const mw = isString(mwRaw) ? mwRaw : undefined;
+    const audioUrl = isString(tokenRaw)
+      ? audioUrlFromToken(tokenRaw)
+      : undefined;
+
+    if (mw || audioUrl) return { mw, audioUrl };
+  }
+  return undefined;
+}
+
+// ---- Dictionary: collect ALL shortdefs grouped by POS + pronunciation ----
+function extractAllDefsByPOS(json: unknown): Array<{
+  fl: string;
+  definitions: string[];
+  pronunciation?: { mw?: string; audioUrl?: string };
+}> {
   if (!isMWDictEntryArray(json)) return [];
-  const byPOS = new Map<string, string[]>();
+
+  // Group by POS, but capture the first available pronunciation per POS
+  const byPOS = new Map<
+    string,
+    {
+      definitions: string[];
+      pronunciation?: { mw?: string; audioUrl?: string };
+    }
+  >();
 
   for (const e of json) {
     const flVal = isString((e as { fl?: unknown }).fl)
       ? ((e as { fl?: unknown }).fl as string)
       : null;
     const sdVal = (e as { shortdef?: unknown }).shortdef;
+
     if (!flVal || !isStringArray(sdVal)) continue;
 
-    const bucket = byPOS.get(flVal) ?? [];
+    const bucket = byPOS.get(flVal) ?? { definitions: [] as string[] };
+
+    // Merge unique definitions
     for (const d of sdVal) {
-      if (!bucket.includes(d)) bucket.push(d);
+      if (!bucket.definitions.includes(d)) bucket.definitions.push(d);
     }
+
+    // Set pronunciation once per POS (first entry with audio/respelling wins)
+    if (!bucket.pronunciation) {
+      const pron = firstPron(e);
+      if (pron) bucket.pronunciation = pron;
+    }
+
     byPOS.set(flVal, bucket);
   }
 
-  return Array.from(byPOS, ([fl, definitions]) => ({ fl, definitions }));
+  return Array.from(byPOS, ([fl, { definitions, pronunciation }]) => ({
+    fl,
+    definitions,
+    pronunciation,
+  }));
 }
 
 // ---- Thesaurus: collect synonyms grouped by part of speech ----
@@ -108,7 +173,6 @@ function extractSynonymsByPOS(
       }
     }
 
-    // Only add this POS if we actually found any synonyms
     const list = Array.from(synonyms);
     if (list.length) out.push({ fl: flVal, synonyms: list });
   }

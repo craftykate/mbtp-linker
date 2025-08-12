@@ -1,5 +1,6 @@
-import { Accordion, List, Space, Text } from "@mantine/core";
+import { Accordion, Group, List, Space, Text } from "@mantine/core";
 import { DefineResult } from "@/types/dictionary";
+import SpeakButton from "./SpeakButton";
 
 export default function Results({ result }: { result: DefineResult }) {
   const synMap = new Map(
@@ -27,16 +28,12 @@ export default function Results({ result }: { result: DefineResult }) {
 
   return (
     <div>
-      <Text fw="bold" size="xl">
-        {result.word}
-      </Text>
-
       {result.suggestions.length > 0 && (
         <p>Did you mean: {result.suggestions.join(", ")}?</p>
       )}
 
       <Accordion variant="separated" defaultValue={entries[0]?.fl}>
-        {entries.map(({ fl, definitions }) => {
+        {entries.map(({ fl, definitions, pronunciation }) => {
           const syns = synMap.get(fl) ?? [];
           const showSyns = syns.length ? syns : allSynFallback;
 
@@ -48,6 +45,15 @@ export default function Results({ result }: { result: DefineResult }) {
                 </Text>
               </Accordion.Control>
               <Accordion.Panel>
+                <Group gap="xs">
+                  <Text fw="bold" size="lg">
+                    {result.word}
+                  </Text>
+                  <SpeakButton
+                    word={result.word}
+                    audioUrl={pronunciation?.audioUrl}
+                  />
+                </Group>
                 <List>
                   {definitions.map((d, i) => (
                     <List.Item key={i}>{d}</List.Item>
