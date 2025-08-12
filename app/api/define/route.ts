@@ -1,5 +1,5 @@
 // ---------- Cache settings ----------
-export const revalidate = 60 * 60 * 24 * 30; // 30 days: Next.js Full Route Cache (per URL)
+export const revalidate = 2_592_000; // 30 days: Next.js Full Route Cache (per URL)
 const ROUTE_TTL = 60 * 60 * 24 * 30; // 30 days: CDN s-maxage
 const ROUTE_SWR = 60 * 60 * 24 * 180; // 180 days: stale-while-revalidate at CDN
 const UPSTREAM_TTL = 60 * 60 * 24 * 180; // 180 days: Next Data Cache for MW fetches
