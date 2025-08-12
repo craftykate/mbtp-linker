@@ -28,6 +28,10 @@ export default function Results({ result }: { result: DefineResult }) {
   console.log(entries[0]?.fl === "noun");
   return (
     <div>
+      <Text fw="bold" size="xl">
+        {result.word}
+      </Text>
+
       {result.suggestions.length > 0 && (
         <p>Did you mean: {result.suggestions.join(", ")}?</p>
       )}
