@@ -24,8 +24,7 @@ export default function Results({ result }: { result: DefineResult }) {
   const entries = [...result.entries].sort(
     (a, b) => order.indexOf(a.fl) + 999 - (order.indexOf(b.fl) + 999) // unknowns go last
   );
-  console.log(result);
-  console.log(entries[0]?.fl === "noun");
+
   return (
     <div>
       <Text fw="bold" size="xl">
