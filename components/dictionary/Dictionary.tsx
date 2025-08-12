@@ -11,6 +11,7 @@ import {
   Text,
   Anchor,
   Image,
+  Box,
 } from "@mantine/core";
 import { isNotEmpty, useForm } from "@mantine/form";
 import { IconSearch } from "@tabler/icons-react";
@@ -88,22 +89,35 @@ export default function Dictionary() {
         </Stack>
       </form>
       {result && <Results result={result} />}
-      <Group justify="flex-end" align="center" mt="md" gap="xs">
-        <Text size="xs" c="dimmed">
-          Definitions & synonyms from
+      <Group justify="flex-end" align="center" mt="md" gap="xs" wrap="nowrap">
+        <Text
+          size="xs"
+          c="dimmed"
+          ta="right"
+          style={{
+            flex: "1 1 auto", // take remaining space
+            minWidth: 0, // IMPORTANT: allow text to shrink
+            wordBreak: "break-word", // wrap long strings
+          }}
+        >
+          Merriam-Webster® Intermediate (Grades 6-8): kid-friendly definitions &
+          synonyms
         </Text>
         <Anchor
           href="https://www.merriam-webster.com"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Merriam-Webster"
+          style={{ flex: "0 0 auto" }} // keep logo fixed-size on the right
         >
-          <Image
-            src="/images/MWLogo_LightBG_120x120_2x.png"
-            width={50}
-            height={50}
-            alt="Merriam-Webster®"
-          />
+          <Box w={50} h={50} style={{ flex: "0 0 auto" }}>
+            <Image
+              src="/images/MWLogo_LightBG_120x120_2x.png"
+              alt="Merriam-Webster®"
+              w="100%"
+              h="100%"
+              fit="contain"
+            />
+          </Box>
         </Anchor>
       </Group>
     </>
