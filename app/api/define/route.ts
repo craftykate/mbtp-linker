@@ -1,3 +1,12 @@
+// ---------- Cache settings ----------
+export const revalidate = 60 * 60 * 24 * 30; // 30 days: Next.js Full Route Cache (per URL)
+const ROUTE_TTL = 60 * 60 * 24 * 30; // 30 days: CDN s-maxage
+const ROUTE_SWR = 60 * 60 * 24 * 180; // 180 days: stale-while-revalidate at CDN
+const UPSTREAM_TTL = 60 * 60 * 24 * 180; // 180 days: Next Data Cache for MW fetches
+// If you ever want a tiny browser cache, add: const BROWSER_TTL = 60 * 5;
+// and include max-age in Cache-Control.
+
+// ---------- Types ----------
 type ApiResult = {
   word: string;
   entries: Array<{
@@ -186,13 +195,19 @@ function extractSuggestions(json: unknown, limit = 5): string[] {
 }
 
 export async function GET(req: Request) {
-  const q = new URL(req.url).searchParams.get("q")?.trim();
-  if (!q) return new Response("Missing q", { status: 400 });
+  const url = new URL(req.url);
+  const qOriginal = url.searchParams.get("q")?.trim();
+  const nocache = url.searchParams.get("nocache") === "1";
+  if (!qOriginal) return new Response("Missing q", { status: 400 });
+
+  // Normalize for upstream/cache key while preserving original for display
+  const qNormalized = qOriginal.toLowerCase();
 
   console.info(
     JSON.stringify({
       event: "define_lookup",
-      word: q,
+      word: qOriginal,
+      normalized: qNormalized,
       ts: new Date().toISOString(),
     })
   );
@@ -202,32 +217,54 @@ export async function GET(req: Request) {
   if (!dictKey || !thesKey)
     return new Response("Missing MW keys", { status: 500 });
 
+  // Upstream fetch caching
+  const fetchOpts = nocache
+    ? { cache: "no-store" as const }
+    : { cache: "force-cache" as const, next: { revalidate: UPSTREAM_TTL } };
+
   const [dRes, tRes] = await Promise.all([
     fetch(
       `https://www.dictionaryapi.com/api/v3/references/sd3/json/${encodeURIComponent(
-        q
-      )}?key=${dictKey}`
+        qNormalized
+      )}?key=${dictKey}`,
+      fetchOpts
     ),
     fetch(
       `https://www.dictionaryapi.com/api/v3/references/ithesaurus/json/${encodeURIComponent(
-        q
-      )}?key=${thesKey}`
+        qNormalized
+      )}?key=${thesKey}`,
+      fetchOpts
     ),
   ]);
 
-  const dictJson: unknown = dRes.ok ? await dRes.json() : undefined;
-  const thesJson: unknown = tRes.ok ? await tRes.json() : undefined;
+  if (!dRes.ok || !tRes.ok) {
+    const status = !dRes.ok ? dRes.status : tRes.status;
+    return new Response(`Upstream error ${status}`, { status });
+  }
+
+  const dictJson: unknown = await dRes.json();
+  const thesJson: unknown = await tRes.json();
 
   const entries = extractAllDefsByPOS(dictJson);
   const synonymsByPartOfSpeech = extractSynonymsByPOS(thesJson);
   const suggestions = extractSuggestions(dictJson);
 
   const payload: ApiResult = {
-    word: q,
+    word: qOriginal, // preserve user’s casing for display
     entries,
     synonymsByPartOfSpeech,
     suggestions,
   };
 
-  return Response.json(payload);
+  // CDN / Edge cache headers (no long browser cache by default)
+  const headers = new Headers({
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": nocache
+      ? "no-store"
+      : `public, s-maxage=${ROUTE_TTL}, stale-while-revalidate=${ROUTE_SWR}`,
+    // If you ever enable small browser caching:
+    // "Cache-Control": `public, max-age=${BROWSER_TTL}, s-maxage=${ROUTE_TTL}, stale-while-revalidate=${ROUTE_SWR}`,
+  });
+
+  return new Response(JSON.stringify(payload), { headers });
 }
