@@ -33,43 +33,81 @@ export default function Results({ result }: { result: DefineResult }) {
       )}
 
       <Accordion variant="separated" defaultValue={entries[0]?.fl}>
-        {entries.map(({ fl, definitions, pronunciation }) => {
-          const syns = synMap.get(fl) ?? [];
-          const showSyns = syns.length ? syns : allSynFallback;
+        {entries.map(
+          ({ fl, definitions, pronunciation, examples, etymologies }) => {
+            const syns = synMap.get(fl) ?? [];
+            const showSyns = syns.length ? syns : allSynFallback;
 
-          return (
-            <Accordion.Item key={fl} value={fl}>
-              <Accordion.Control>
-                <Text fw="bold" tt="capitalize">
-                  {fl}
-                </Text>
-              </Accordion.Control>
-              <Accordion.Panel>
-                <Group gap="xs">
-                  <Text fw="bold" size="lg">
-                    {result.word}
+            return (
+              <Accordion.Item key={fl} value={fl}>
+                <Accordion.Control>
+                  <Text fw="bold" tt="capitalize">
+                    {fl}
                   </Text>
-                  <SpeakButton
-                    word={result.word}
-                    audioUrl={pronunciation?.audioUrl}
-                  />
-                </Group>
-                <List>
-                  {definitions.map((d, i) => (
-                    <List.Item key={i}>{d}</List.Item>
-                  ))}
-                </List>
-                {showSyns.length > 0 && (
-                  <>
-                    <Space h="md" />
-                    <Text fw="bold">Synonyms:</Text>
-                    <p>{showSyns.join(", ")}</p>
-                  </>
-                )}
-              </Accordion.Panel>
-            </Accordion.Item>
-          );
-        })}
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Group gap="xs">
+                    {/* Word */}
+                    <Text fw="bold" size="lg">
+                      {result.word}
+                    </Text>
+                    {/* Pronunciation symbols */}
+                    {pronunciation?.mw && (
+                      <Text c="dimmed">/{pronunciation.mw}/</Text>
+                    )}
+                    {/* Speak button */}
+                    <SpeakButton
+                      word={result.word}
+                      audioUrl={pronunciation?.audioUrl}
+                    />
+                  </Group>
+
+                  {/* Definitions */}
+                  <List>
+                    {definitions.map((d, i) => (
+                      <List.Item key={i}>{d}</List.Item>
+                    ))}
+                  </List>
+
+                  {/* Examples */}
+                  {examples.length > 0 && (
+                    <>
+                      <Space h="md" />
+                      <Text fw="bold">Examples:</Text>
+                      <List>
+                        {examples.map((ex, i) => (
+                          <List.Item key={i}>{ex}</List.Item>
+                        ))}
+                      </List>
+                    </>
+                  )}
+
+                  {/* Synonyms */}
+                  {showSyns.length > 0 && (
+                    <>
+                      <Space h="md" />
+                      <Text fw="bold">Synonyms:</Text>
+                      <p>{showSyns.join(", ")}</p>
+                    </>
+                  )}
+
+                  {/* Etymology */}
+                  {etymologies.length > 0 && (
+                    <>
+                      <Space h="md" />
+                      <Text fw="bold">Etymology:</Text>
+                      <List spacing="xs">
+                        {etymologies.map((et, i) => (
+                          <List.Item key={i}>{et}</List.Item>
+                        ))}
+                      </List>
+                    </>
+                  )}
+                </Accordion.Panel>
+              </Accordion.Item>
+            );
+          }
+        )}
       </Accordion>
     </div>
   );

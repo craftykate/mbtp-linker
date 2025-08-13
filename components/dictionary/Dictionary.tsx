@@ -98,7 +98,7 @@ export default function Dictionary() {
         </Group>
       )}
 
-      {result && <Results result={result} />}
+      {result && <Results result={result} key={result.word} />}
       <Group justify="flex-end" align="center" mt="md" gap="xs" wrap="nowrap">
         <Text
           size="xs"

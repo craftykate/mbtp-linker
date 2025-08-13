@@ -2,6 +2,8 @@ type PosEntry = {
   fl: string;
   definitions: string[];
   pronunciation?: { mw?: string; audioUrl?: string };
+  examples: string[];
+  etymologies: string[];
 };
 
 type PosSyns = {
