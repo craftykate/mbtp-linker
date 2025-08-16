@@ -3,13 +3,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import { logEvent } from "@/lib/logging/server-logging/logEvent";
-import type { CacheState } from "@/types/logging";
-
-type EventName =
-  | "dictionary_lookup"
-  | "link_suffix_submit"
-  | "link_click"
-  | "unknown";
+import type { CacheState, EventName } from "@/types/logging";
 
 type Body = {
   event: EventName;
@@ -49,11 +43,14 @@ export async function POST(req: Request) {
     void logEvent(body.event, body.data, {
       cache: body.cache ?? null,
       client_ts: body.client_ts,
-      session: body.session,
-      clientId: body.clientId,
+      session: body.session ?? null,
+      clientId: body.clientId ?? null,
       eventId: body.eventId,
       route: "/api/event",
       ua,
+      origin: "client", // <— important
+      category: "event", // <— explicit (you can map per-event later)
+      severity: "info", // <— explicit
     }).catch(() => {});
 
     return new Response(null, { status: 204, headers: headersNoStore });

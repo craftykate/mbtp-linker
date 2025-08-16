@@ -360,6 +360,7 @@ export async function GET(req: Request) {
   const qOriginal = url.searchParams.get("q")?.trim();
   const nocache = url.searchParams.get("nocache") === "1";
   const debug = url.searchParams.get("debug") === "1";
+  const eventId = url.searchParams.get("eid") ?? undefined;
   if (!qOriginal) return new Response("Missing q", { status: 400 });
 
   const qNormalized = qOriginal.toLowerCase();
@@ -433,7 +434,6 @@ export async function GET(req: Request) {
       "dictionary_lookup",
       {
         word_original: qOriginal,
-        word_lower: qNormalized,
         normalized: qNormalized,
         pos: payload.entries[0]?.fl ?? null,
         source: "mw",
@@ -442,6 +442,10 @@ export async function GET(req: Request) {
         cache: "MISS",
         route: "/api/define",
         ua: req.headers.get("user-agent") ?? null,
+        eventId,
+        origin: "server", // <— important
+        category: "event", // <— explicit
+        severity: "info", // <— explicit
       }
     ).catch(() => {});
 

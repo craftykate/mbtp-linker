@@ -3,7 +3,12 @@ import "server-only";
 import type { DocumentData } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { db } from "@/lib/logging/server-logging/firebaseAdmin";
-import type { CacheState } from "@/types/logging";
+import type {
+  CacheState,
+  LogCategory,
+  Severity,
+  EventName,
+} from "@/types/logging";
 
 /* ---------- config & types ---------- */
 
@@ -11,12 +16,6 @@ type AppEnv = "dev" | "stage" | "prod";
 const ENV: AppEnv =
   (process.env.APP_ENV as AppEnv | undefined) ??
   (process.env.NODE_ENV === "production" ? "prod" : "dev");
-
-type EventName =
-  | "dictionary_lookup"
-  | "link_suffix_submit"
-  | "link_click"
-  | "unknown";
 
 const APP_ID = process.env.APP_ID ?? "homeschool-dictionary";
 
@@ -33,39 +32,66 @@ type Extras = Partial<{
   cache: CacheState;
   route: string;
   client_ts: number;
-  session: string;
-  clientId: string;
+  session: string | null;
+  clientId: string | null;
+  userId: string | null;
   ua: string | null;
-  eventId: string; // optional de-dupe token
+  eventId: string; // for de-dupe
+  origin: "client" | "server";
+  category: LogCategory;
+  severity: Severity;
+  version: string | null;
+  ttlDays: number; // (to compute ttlAt)
 }>;
 
 type EventEnvelope = {
   appId: string;
   env: AppEnv;
   event: EventName;
-  ts: FieldValue; // server timestamp sentinel
-  cache: CacheState;
-  route?: string;
+  category: LogCategory;
+  severity: Severity;
+  origin: "client" | "server";
+  ts: FieldValue;
   client_ts?: number;
-  session?: string;
-  clientId?: string;
-  ua: string | null;
-  data: Record<string, unknown>;
   eventId?: string;
+
+  // principals / trace
+  userId?: string | null;
+  session?: string | null;
+  clientId?: string | null;
+
+  // request-ish
+  route?: string;
+  cache: CacheState;
+  version?: string | null;
+  ua: string | null;
+
+  // housekeeping
+  ttlAt?: FieldValue;
+
+  // payload
+  data: Record<string, unknown>;
 };
 
 /* ---------- helpers ---------- */
 
 // Deeply remove all `undefined` values from plain objects/arrays
+function isPlainObject(x: unknown): x is Record<string, unknown> {
+  if (typeof x !== "object" || x === null) return false;
+  const proto = Object.getPrototypeOf(x);
+  return proto === Object.prototype || proto === null;
+}
+
 function pruneUndefinedDeep(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(pruneUndefinedDeep);
-  if (value !== null && typeof value === "object") {
+  if (isPlainObject(value)) {
     const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    for (const [k, v] of Object.entries(value)) {
       if (v !== undefined) out[k] = pruneUndefinedDeep(v);
     }
     return out;
   }
+  // IMPORTANT: leave non-plain objects alone (FieldValue, Timestamp, etc.)
   return value;
 }
 
@@ -81,33 +107,70 @@ export async function logEvent(
 
     const coll = db.collection("apps").doc(APP_ID).collection("events");
 
-    // Optional: skip duplicates if the same eventId arrives twice
+    // Prefer true idempotency: if eventId present, create doc with that ID.
     if (extras?.eventId) {
-      const existing = await coll
-        .where("eventId", "==", extras.eventId)
-        .limit(1)
-        .get();
-      if (!existing.empty) return;
+      const base: EventEnvelope = {
+        appId: APP_ID,
+        env: ENV,
+        event,
+        category: extras.category ?? "event",
+        severity: extras.severity ?? "info",
+        origin: extras.origin ?? "server",
+        ts: FieldValue.serverTimestamp(),
+        client_ts: extras.client_ts,
+        eventId: extras.eventId,
+        userId: extras.userId ?? null,
+        session: extras.session ?? null,
+        clientId: extras.clientId ?? null,
+        route: extras.route,
+        cache: extras.cache ?? null,
+        version: extras.version ?? process.env.VERCEL_GIT_COMMIT_SHA ?? null,
+        ua: extras.ua ? extras.ua.slice(0, 160) : null,
+        data,
+        ttlAt:
+          extras.ttlDays != null
+            ? (FieldValue.serverTimestamp() as unknown as FieldValue) // placeholder; see note below
+            : undefined,
+      };
+
+      // NOTE: Firestore can't compute ttlAt = now+N at write without Cloud Functions.
+      // If you want TTL, either write an absolute timestamp from server code,
+      // or attach a Cloud Function to backfill ttlAt. For now you can omit ttlAt
+      // or pass a precomputed Date from server where you know "now".
+      const doc = pruneUndefinedDeep(base) as DocumentData;
+
+      try {
+        await coll.doc(extras.eventId).create(doc);
+      } catch {
+        // ALREADY_EXISTS -> drop
+      }
+      return;
     }
 
+    // Fallback (no eventId): simple add()
     const base: EventEnvelope = {
       appId: APP_ID,
       env: ENV,
       event,
+      category: extras?.category ?? "event",
+      severity: extras?.severity ?? "info",
+      origin: extras?.origin ?? "server",
       ts: FieldValue.serverTimestamp(),
-      cache: extras?.cache ?? null, // null is allowed in Firestore
-      route: extras?.route,
       client_ts: extras?.client_ts,
-      session: extras?.session,
-      clientId: extras?.clientId,
+      userId: extras?.userId ?? null,
+      session: extras?.session ?? null,
+      clientId: extras?.clientId ?? null,
+      route: extras?.route,
+      cache: extras?.cache ?? null,
+      version: extras?.version ?? process.env.VERCEL_GIT_COMMIT_SHA ?? null,
       ua: extras?.ua ? extras.ua.slice(0, 160) : null,
       data,
-      ...(extras?.eventId ? { eventId: extras.eventId } : {}),
     };
 
     const doc = pruneUndefinedDeep(base) as DocumentData;
+    console.log("doc", doc);
     await coll.add(doc);
   } catch {
-    // Swallow errors — logging must never affect UX
+    // swallow
   }
 }
