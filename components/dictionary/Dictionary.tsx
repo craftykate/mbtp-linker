@@ -16,6 +16,8 @@ import {
 } from "@mantine/core";
 import { isNotEmpty, useForm } from "@mantine/form";
 import { IconSearch, IconX } from "@tabler/icons-react";
+import { logCacheHit } from "@/lib/logging/client-logging/logClient";
+import { fetchDefine, ApiError } from "@/lib/api-helpers/fetchDefine";
 import { DefineResult } from "@/types/dictionary";
 import Results from "./Results";
 
@@ -38,12 +40,31 @@ export default function Dictionary() {
   });
 
   const handleSubmit = async (values: { searchTerm: string }) => {
-    const res = await fetch(
-      `/api/define?q=${encodeURIComponent(values.searchTerm)}`
-    );
-    setResult(await res.json());
-    setLoading(false);
-    form.reset();
+    const q = values.searchTerm.trim();
+    if (!q || q.length > 64) return;
+    setLoading(true);
+
+    try {
+      const { data, response } = await fetchDefine(q);
+
+      // Log the event (only when HIT/STALE) — keep as-is if your logger expects Response
+      await logCacheHit(response, "dictionary_lookup", {
+        word_original: q,
+        word_lower: q.toLowerCase(),
+        normalized: q.toLowerCase(),
+        pos: data.entries?.[0]?.fl ?? null,
+        source: "mw",
+      });
+
+      setResult(data);
+      form.reset();
+    } catch (e) {
+      const msg =
+        e instanceof ApiError ? e.message : "Something went wrong. Try again.";
+      console.error("Define error:", msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
