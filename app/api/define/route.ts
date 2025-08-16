@@ -1,5 +1,9 @@
+import "server-only";
+
 import { logEvent } from "@/lib/logging/server-logging/logEvent";
 import type { DefinePayload, DefineEntry, SynByPOS } from "@/types/dictionary";
+
+export const runtime = "nodejs";
 
 // ---------- Cache settings (literals for Next config) ----------
 export const revalidate = 2_592_000; // 30 days: Full Route Cache
@@ -425,28 +429,21 @@ export async function GET(req: Request) {
       suggestions,
     };
 
-    // ---- Optional dev / always prod logging (non-blocking) ----
-    const shouldLog =
-      process.env.NODE_ENV === "production" || process.env.LOG_EVENTS === "1";
-    if (shouldLog) {
-      void logEvent(
-        "dictionary_lookup",
-        {
-          word_original: qOriginal,
-          word_lower: qNormalized,
-          normalized: qNormalized,
-          pos: payload.entries[0]?.fl ?? null,
-          source: "mw",
-        },
-        {
-          cache: "MISS",
-          route: "/api/define",
-          ua: req.headers.get("user-agent") ?? undefined,
-        }
-      ).catch(() => {
-        // never affect response/caching
-      });
-    }
+    void logEvent(
+      "dictionary_lookup",
+      {
+        word_original: qOriginal,
+        word_lower: qNormalized,
+        normalized: qNormalized,
+        pos: payload.entries[0]?.fl ?? null,
+        source: "mw",
+      },
+      {
+        cache: "MISS",
+        route: "/api/define",
+        ua: req.headers.get("user-agent") ?? null,
+      }
+    ).catch(() => {});
 
     const headers = new Headers({
       "Content-Type": "application/json; charset=utf-8",
