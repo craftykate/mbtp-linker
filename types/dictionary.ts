@@ -17,3 +17,19 @@ export type DefineResult = {
   synonymsByPartOfSpeech: PosSyns[]; // e.g., [{ fl:"noun", synonyms:[...] }, { fl:"verb", ...}]
   suggestions: string[]; // when MW returns spelling suggestions
 };
+
+export type DefineEntry = {
+  fl: string;
+  definitions: string[];
+  pronunciation?: { mw?: string; audioUrl?: string };
+  examples: string[];
+  etymologies: string[];
+};
+export type SynByPOS = { fl: string; synonyms: string[] };
+
+export type DefinePayload = {
+  word: string;
+  entries: DefineEntry[];
+  synonymsByPartOfSpeech: SynByPOS[];
+  suggestions: string[];
+};
