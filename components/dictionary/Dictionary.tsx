@@ -45,16 +45,16 @@ export default function Dictionary() {
     setLoading(true);
 
     try {
-      const { data, response } = await fetchDefine(q);
+      const { data, cache } = await fetchDefine(q);
 
-      // Log the event (only when HIT/STALE) — keep as-is if your logger expects Response
-      await logCacheHit(response, "dictionary_lookup", {
+      // Log the event (only when HIT/STALE) - non-blocking
+      void logCacheHit(cache, "dictionary_lookup", {
         word_original: q,
         word_lower: q.toLowerCase(),
         normalized: q.toLowerCase(),
         pos: data.entries?.[0]?.fl ?? null,
         source: "mw",
-      });
+      }).catch(() => {});
 
       setResult(data);
       form.reset();
@@ -80,7 +80,6 @@ export default function Dictionary() {
         onSubmit={form.onSubmit(
           // If no errors
           (values) => {
-            setLoading(true);
             handleSubmit(values);
           }
         )}
