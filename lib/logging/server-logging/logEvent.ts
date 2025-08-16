@@ -168,7 +168,6 @@ export async function logEvent(
     };
 
     const doc = pruneUndefinedDeep(base) as DocumentData;
-    console.log("doc", doc);
     await coll.add(doc);
   } catch {
     // swallow
