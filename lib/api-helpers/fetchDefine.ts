@@ -1,8 +1,7 @@
 "use client";
 
 import type { DefineResult } from "@/types/dictionary";
-
-export type CacheState = "HIT" | "MISS" | "STALE" | null;
+import { CacheState } from "@/types/logging";
 
 export class ApiError extends Error {
   status: number;
