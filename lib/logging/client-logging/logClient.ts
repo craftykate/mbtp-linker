@@ -1,6 +1,7 @@
 "use client";
 
 import type { CacheState } from "@/types/logging";
+import { LOG_OPT_OUT_COOKIE } from "@/lib/logging/constants";
 
 export type EventName =
   | "dictionary_lookup"
@@ -10,6 +11,10 @@ export type EventName =
 
 type CacheHit = Extract<CacheState, "HIT" | "STALE">;
 
+const isOptedOut = (): boolean =>
+  typeof document !== "undefined" &&
+  document.cookie.split("; ").some((c) => c === `${LOG_OPT_OUT_COOKIE}=1`);
+
 async function sendEvent(body: {
   event: EventName;
   data: Record<string, unknown>;
@@ -17,6 +22,8 @@ async function sendEvent(body: {
   client_ts: number;
   eventId?: string;
 }) {
+  if (isOptedOut()) return; // <-- skip all client beacons for me
+
   const json = JSON.stringify(body);
   const blob = new Blob([json], { type: "application/json" });
 

@@ -1,6 +1,10 @@
 "use client";
 
 import type { DefineResult } from "@/types/dictionary";
+import {
+  LOG_OPT_OUT_COOKIE,
+  LOG_OPT_OUT_HEADER,
+} from "@/lib/logging/constants";
 import { CacheState } from "@/types/logging";
 
 export class ApiError extends Error {
@@ -26,6 +30,12 @@ export async function fetchDefine(
   const headers = new Headers();
   headers.set("x-q-original", q); // keep user casing off-key
   if (opts?.eventId) headers.set("x-event-id", opts.eventId);
+
+  // if opted out, tag request so server can skip MISS logging
+  const optedOut =
+    typeof document !== "undefined" &&
+    document.cookie.split("; ").some((c) => c === `${LOG_OPT_OUT_COOKIE}=1`);
+  if (optedOut) headers.set(LOG_OPT_OUT_HEADER, "1");
 
   const res = await fetch(`/api/define?q=${encodeURIComponent(qLower)}`, {
     headers,

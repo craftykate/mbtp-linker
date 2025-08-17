@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+import { LOG_OPT_OUT_COOKIE } from "@/lib/logging/constants";
 import { logEvent } from "@/lib/logging/server-logging/logEvent";
 import type { CacheState, EventName } from "@/types/logging";
 
@@ -23,6 +24,14 @@ const headersNoStore = {
 
 export async function POST(req: Request) {
   try {
+    const cookieHeader = req.headers.get("cookie") || "";
+    const isOptedOut = cookieHeader
+      .split(";")
+      .some((c) => c.trim().startsWith(`${LOG_OPT_OUT_COOKIE}=1`));
+    if (isOptedOut) {
+      return new Response(null, { status: 204, headers: headersNoStore }); // drop
+    }
+
     const text = await req.text();
     if (!text)
       return new Response(null, { status: 204, headers: headersNoStore });

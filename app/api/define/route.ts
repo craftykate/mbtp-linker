@@ -1,5 +1,6 @@
 import "server-only";
 
+import { LOG_OPT_OUT_HEADER } from "@/lib/logging/constants";
 import { logEvent } from "@/lib/logging/server-logging/logEvent";
 import type { DefinePayload, DefineEntry, SynByPOS } from "@/types/dictionary";
 
@@ -432,24 +433,28 @@ export async function GET(req: Request) {
       suggestions,
     };
 
-    void logEvent(
-      "dictionary_lookup",
-      {
-        word_original: qOriginal,
-        normalized: qNormalized,
-        pos: payload.entries[0]?.fl ?? null,
-        source: "mw",
-      },
-      {
-        cache: "MISS",
-        route: "/api/define",
-        ua: req.headers.get("user-agent") ?? null,
-        eventId,
-        origin: "server", // <— important
-        category: "event", // <— explicit
-        severity: "info", // <— explicit
-      }
-    ).catch(() => {});
+    const skipLogging = req.headers.get(LOG_OPT_OUT_HEADER) === "1";
+
+    if (!skipLogging) {
+      void logEvent(
+        "dictionary_lookup",
+        {
+          word_original: qOriginal,
+          normalized: qNormalized,
+          pos: payload.entries[0]?.fl ?? null,
+          source: "mw",
+        },
+        {
+          cache: "MISS",
+          route: "/api/define",
+          ua: req.headers.get("user-agent") ?? null,
+          eventId,
+          origin: "server", // <— important
+          category: "event", // <— explicit
+          severity: "info", // <— explicit
+        }
+      ).catch(() => {});
+    }
 
     const headers = new Headers({
       "Content-Type": "application/json; charset=utf-8",
