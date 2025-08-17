@@ -10,10 +10,6 @@ export type EventName =
 
 type CacheHit = Extract<CacheState, "HIT" | "STALE">;
 
-function isHit(x: CacheState): x is CacheHit {
-  return x === "HIT" || x === "STALE";
-}
-
 async function sendEvent(body: {
   event: EventName;
   data: Record<string, unknown>;
@@ -39,19 +35,19 @@ async function sendEvent(body: {
   });
 }
 
-/** Log only when CDN served the request (HIT/STALE). */
 export async function logCacheHit(
   cacheState: CacheState,
   event: EventName,
   data: Record<string, unknown>,
-  opts?: { eventId?: string }
+  opts?: { eventId?: string; always?: boolean }
 ): Promise<void> {
-  if (!isHit(cacheState)) return;
-  // fire-and-forget at call site if you don’t want to await
+  const hit = cacheState === "HIT" || cacheState === "STALE";
+  if (!hit && !opts?.always) return;
+
   await sendEvent({
     event,
     data,
-    cache: cacheState,
+    cache: hit ? (cacheState as Extract<CacheState, "HIT" | "STALE">) : null,
     client_ts: Date.now(),
     eventId: opts?.eventId,
   });

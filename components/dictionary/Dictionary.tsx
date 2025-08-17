@@ -40,31 +40,32 @@ export default function Dictionary() {
   });
 
   const handleSubmit = async (values: { searchTerm: string }) => {
-    if (loading) return; // prevents double-submits
+    if (loading) return;
     const q = values.searchTerm.trim();
     if (!q || q.length > 64) return;
 
     setLoading(true);
     const qLower = q.toLowerCase();
-    const eventId = crypto.randomUUID(); // shared id for client+server dedupe
+    const eventId = crypto.randomUUID();
 
     try {
-      const { data, cache } = await fetchDefine(q);
+      const { data, cache } = await fetchDefine(q, { eventId });
 
-      // Non-blocking client log (HIT/STALE only); include same eventId
       void logCacheHit(
         cache,
         "dictionary_lookup",
         {
           word_original: q,
+          word_lower: qLower,
           normalized: qLower,
           pos: data.entries?.[0]?.fl ?? null,
           source: "mw",
         },
-        { eventId }
+        { eventId, always: true }
       ).catch(() => {});
 
-      setResult(data);
+      const displayData: DefineResult = { ...data, word: q };
+      setResult(displayData);
       form.reset();
     } catch (e) {
       const msg =

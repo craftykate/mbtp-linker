@@ -357,13 +357,15 @@ function extractSuggestions(json: unknown, limit = 5): string[] {
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const qOriginal = url.searchParams.get("q")?.trim();
+  // URL q is the canonicalized (lowercase) key
+  const qNormalized = url.searchParams.get("q")?.trim();
+  if (!qNormalized) return new Response("Missing q", { status: 400 });
+  // Original casing from header (does not affect cache key)
+  const qOriginal = req.headers.get("x-q-original")?.trim() || qNormalized;
   const nocache = url.searchParams.get("nocache") === "1";
   const debug = url.searchParams.get("debug") === "1";
-  const eventId = url.searchParams.get("eid") ?? undefined;
+  const eventId = req.headers.get("x-event-id") ?? undefined;
   if (!qOriginal) return new Response("Missing q", { status: 400 });
-
-  const qNormalized = qOriginal.toLowerCase();
 
   const dictKey = process.env.MW_INTERMEDIATE_DICT_KEY;
   const thesKey = process.env.MW_INTERMEDIATE_THES_KEY;

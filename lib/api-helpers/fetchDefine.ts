@@ -19,9 +19,17 @@ function cacheHeader(res: Response): CacheState {
 
 /** Fetch a definition, parse JSON, throw typed error on non-OK. */
 export async function fetchDefine(
-  q: string
+  q: string,
+  opts?: { eventId?: string }
 ): Promise<{ data: DefineResult; cache: CacheState; response: Response }> {
-  const res = await fetch(`/api/define?q=${encodeURIComponent(q)}`);
+  const qLower = q.toLowerCase(); // ← canonical key
+  const headers = new Headers();
+  headers.set("x-q-original", q); // keep user casing off-key
+  if (opts?.eventId) headers.set("x-event-id", opts.eventId);
+
+  const res = await fetch(`/api/define?q=${encodeURIComponent(qLower)}`, {
+    headers,
+  });
   const cache = cacheHeader(res);
 
   const ct = res.headers.get("content-type") || "";
@@ -31,9 +39,8 @@ export async function fetchDefine(
     let msg = `Request failed (${res.status})`;
     try {
       const body = isJson ? await res.json() : await res.text();
-      if (typeof body === "string") {
-        msg = body || msg;
-      } else if (
+      if (typeof body === "string") msg = body || msg;
+      else if (
         (body as { message?: unknown; error?: unknown })?.message ||
         (body as { message?: unknown; error?: unknown })?.error
       ) {
@@ -47,9 +54,7 @@ export async function fetchDefine(
             msg
         );
       }
-    } catch {
-      /* ignore parse errors */
-    }
+    } catch {}
     throw new ApiError(msg, res.status);
   }
 
