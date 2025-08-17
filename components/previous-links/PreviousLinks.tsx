@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconExternalLink, IconTrash } from "@tabler/icons-react";
+import { logUi } from "@/lib/logging/client-logging/logClient";
 import { useSavedLinksContext } from "@/store/settings";
 
 export default function PreviousLinks() {
@@ -32,6 +33,13 @@ export default function PreviousLinks() {
     updatedLinks.splice(index, 1);
     updatedLinks.unshift(savedLinks[index]);
     updateAllLinks(updatedLinks);
+
+    const eventId = crypto.randomUUID();
+    void logUi(
+      "link_suffix_submit",
+      { link_suffix: link.label },
+      { eventId }
+    ).catch(() => {});
   };
 
   return (
