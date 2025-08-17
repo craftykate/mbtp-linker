@@ -33,8 +33,9 @@ export async function POST(req: Request) {
     }
 
     const text = await req.text();
-    if (!text)
+    if (!text) {
       return new Response(null, { status: 204, headers: headersNoStore });
+    }
 
     let body: Body;
     try {
@@ -47,9 +48,10 @@ export async function POST(req: Request) {
       return new Response(null, { status: 204, headers: headersNoStore });
     }
 
-    // Fire-and-forget; let the logger enforce enablement
     const ua = req.headers.get("user-agent");
-    void logEvent(body.event, body.data, {
+
+    // ✅ Await the write so the serverless runtime doesn't freeze mid-log
+    await logEvent(body.event, body.data, {
       cache: body.cache ?? null,
       client_ts: body.client_ts,
       session: body.session ?? null,
@@ -60,7 +62,7 @@ export async function POST(req: Request) {
       origin: "client", // <— important
       category: "event", // <— explicit (you can map per-event later)
       severity: "info", // <— explicit
-    }).catch(() => {});
+    });
 
     return new Response(null, { status: 204, headers: headersNoStore });
   } catch {

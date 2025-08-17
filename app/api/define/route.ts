@@ -435,24 +435,35 @@ export async function GET(req: Request) {
 
     const skipLogging = req.headers.get(LOG_OPT_OUT_HEADER) === "1";
 
+    const withTimeout = <T>(p: Promise<T>, ms: number) =>
+      Promise.race([
+        p,
+        new Promise<never>((_, r) =>
+          setTimeout(() => r(new Error("timeout")), ms)
+        ),
+      ]);
+
     if (!skipLogging) {
-      void logEvent(
-        "dictionary_lookup",
-        {
-          word_original: qOriginal,
-          normalized: qNormalized,
-          pos: payload.entries[0]?.fl ?? null,
-          source: "mw",
-        },
-        {
-          cache: "MISS",
-          route: "/api/define",
-          ua: req.headers.get("user-agent") ?? null,
-          eventId,
-          origin: "server", // <— important
-          category: "event", // <— explicit
-          severity: "info", // <— explicit
-        }
+      await withTimeout(
+        logEvent(
+          "dictionary_lookup",
+          {
+            word_original: qOriginal,
+            normalized: qNormalized,
+            pos: payload.entries[0]?.fl ?? null,
+            source: "mw",
+          },
+          {
+            cache: "MISS",
+            route: "/api/define",
+            ua: req.headers.get("user-agent") ?? null,
+            eventId,
+            origin: "server",
+            category: "event",
+            severity: "info",
+          }
+        ),
+        600
       ).catch(() => {});
     }
 
