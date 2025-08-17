@@ -10,7 +10,7 @@ export default function Header() {
       variant="gradient"
       gradient={{ from: "cyan", to: "purple", deg: 120 }}
     >
-      Easy MBTP Linker
+      Easy BTP Linker
     </Text>
   );
 }
