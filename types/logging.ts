@@ -7,5 +7,5 @@ export type EventName =
   | "button_click"
   | "link_suffix_submit"
   | "dictionary_lookup"
-  | "link_click"
+  | "external_link_click"
   | "unknown";

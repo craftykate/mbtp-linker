@@ -3,6 +3,7 @@
 import { StaticImageData } from "next/image";
 import { Anchor, Grid, Image } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import { logUi } from "@/lib/logging/client-logging/logClient";
 
 export default function LinkRow({
   href,
@@ -16,6 +17,17 @@ export default function LinkRow({
   description: string;
 }) {
   const isNarrow = useMediaQuery("(max-width: 700px)");
+
+  const handleLogClick = (link_id: string, url: string, label: string) => {
+    const eventId = crypto.randomUUID();
+    void logUi(
+      "external_link_click",
+      { link_id, label, url, page: "/", component: "OtherLinks" },
+      { eventId }
+    ).catch(() => {});
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <Grid align="center">
@@ -31,7 +43,11 @@ export default function LinkRow({
         </Grid.Col>
       )}
       <Grid.Col span={isNarrow ? 12 : 11}>
-        <Anchor href={href} target="_blank">
+        <Anchor
+          href={href}
+          target="_blank"
+          onClick={() => handleLogClick("otherLinks." + label, href, label)}
+        >
           {label}
         </Anchor>{" "}
         - {description}
