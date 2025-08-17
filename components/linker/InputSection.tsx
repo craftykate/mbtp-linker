@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Button, Group, Input, NumberInput, Stack, Text } from "@mantine/core";
-import { isNotEmpty, useForm } from "@mantine/form";
+import { useForm } from "@mantine/form";
 import { useFocusTrap } from "@mantine/hooks";
-import { useSavedLinksContext } from "@/store/settings";
 import { IconExternalLink } from "@tabler/icons-react";
+import { logUi } from "@/lib/logging/client-logging/logClient";
+import { useSavedLinksContext } from "@/store/settings";
 
 export default function InputSection() {
   const { addSavedLink } = useSavedLinksContext();
@@ -14,27 +15,42 @@ export default function InputSection() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm({
+  type FormValues = { linkSuffix: number | "" };
+
+  const form = useForm<FormValues>({
     initialValues: {
       linkSuffix: "",
     },
     validate: {
-      linkSuffix: (value) => {
-        if (!isNotEmpty(value)) {
-          return "Link suffix is required";
-        }
-        const number = Number(value);
-        if (isNaN(number) || number <= 0) {
-          return "Link suffix must be a positive number";
-        }
+      linkSuffix: (v) => {
+        const n = typeof v === "number" ? v : Number(v);
+        return Number.isFinite(n) && n > 0
+          ? null
+          : "Link suffix must be a positive number";
       },
     },
   });
 
-  const handleSubmit = (values: { linkSuffix: string }) => {
-    const url = `https://www.beyondthepage.com/link/${values.linkSuffix}`;
+  const handleSubmit = (values: FormValues) => {
+    if (isSubmitting) return;
+
+    const n =
+      typeof values.linkSuffix === "number"
+        ? values.linkSuffix
+        : Number(values.linkSuffix);
+    if (!Number.isFinite(n) || n <= 0) return;
+
+    const suffix = String(n); // normalized string for URL/logging
+    const eventId = crypto.randomUUID();
+    void logUi(
+      "link_suffix_submit",
+      { link_suffix: suffix },
+      { eventId }
+    ).catch(() => {});
+
+    const url = `https://www.beyondthepage.com/link/${suffix}`;
     window.open(url);
-    addSavedLink(values.linkSuffix, url);
+    addSavedLink(suffix, url);
     setIsSubmitting(false);
     form.reset();
   };
@@ -60,7 +76,6 @@ export default function InputSection() {
           <NumberInput
             required
             placeholder="12345"
-            value={form.values.linkSuffix}
             min={1}
             {...form.getInputProps("linkSuffix")}
             error={false}
