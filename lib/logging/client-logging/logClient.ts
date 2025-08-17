@@ -1,13 +1,7 @@
 "use client";
 
-import type { CacheState } from "@/types/logging";
+import type { CacheState, EventName } from "@/types/logging";
 import { LOG_OPT_OUT_COOKIE } from "@/lib/logging/constants";
-
-export type EventName =
-  | "dictionary_lookup"
-  | "link_suffix_submit"
-  | "link_click"
-  | "unknown";
 
 type CacheHit = Extract<CacheState, "HIT" | "STALE">;
 
