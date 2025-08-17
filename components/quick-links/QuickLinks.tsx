@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Flex } from "@mantine/core";
+import { Button, Flex, Divider, Text } from "@mantine/core";
 import { usePathname } from "next/navigation";
 import { logUi } from "@/lib/logging/client-logging/logClient";
 
@@ -23,31 +23,40 @@ export default function QuickLinks() {
   };
 
   return (
-    <Flex justify="center" gap="md" my="md">
-      <Button
-        variant="light"
-        onClick={() =>
-          handleLogButtonClick(
-            "quicklinks.learning-gates",
-            "https://www.beyondthepage.com/learning-gate/",
-            "Learning Gates"
-          )
-        }
-      >
-        Learning Gates
-      </Button>
-      <Button
-        variant="light"
-        onClick={() =>
-          handleLogButtonClick(
-            "quicklinks.online-curriculum",
-            "https://www.beyondthepage.com/online/",
-            "Online Curriculum"
-          )
-        }
-      >
-        Online Curriculum
-      </Button>
-    </Flex>
+    <>
+      <Divider
+        my="sm"
+        color="cyan"
+        label={<Text size="lg">Link Builder</Text>}
+        labelPosition="center"
+        size="xs"
+      />
+      <Flex justify="center" gap="md" my="md">
+        <Button
+          variant="light"
+          onClick={() =>
+            handleLogButtonClick(
+              "quicklinks.learning-gates",
+              "https://www.beyondthepage.com/learning-gate/",
+              "Learning Gates"
+            )
+          }
+        >
+          Learning Gates
+        </Button>
+        <Button
+          variant="light"
+          onClick={() =>
+            handleLogButtonClick(
+              "quicklinks.online-curriculum",
+              "https://www.beyondthepage.com/online/",
+              "Online Curriculum"
+            )
+          }
+        >
+          Online Curriculum
+        </Button>
+      </Flex>
+    </>
   );
 }
