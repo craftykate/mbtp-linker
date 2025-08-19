@@ -15,6 +15,7 @@ import { useTimerSessionsContext } from "@/store/timerSessions";
 import { TimerSessionType } from "@/types/timer";
 import { formatTimer } from "@/utils/format-helpers";
 import PreviousTimers from "./PreviousTimers";
+import { KeepScreenAwake } from "@/components/ui/KeepScreenAwake";
 
 export default function Timer() {
   const { addTimerSession, updateSession } = useTimerSessionsContext();
@@ -213,8 +214,8 @@ export default function Timer() {
             </Button>
           </Group>
         )}
+        {showTimer && <KeepScreenAwake />}
       </Stack>
-
       <PreviousTimers
         onResume={handleResumeFromSession}
         loadDisabled={showTimer /* disable loading when any timer is active */}
