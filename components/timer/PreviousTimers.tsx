@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ActionIcon,
   Divider,
@@ -6,10 +7,12 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { IconTrash, IconClockPlay } from "@tabler/icons-react";
 import { useTimerSessionsContext } from "@/store/timerSessions";
 import type { TimerSessionType } from "@/types/timer";
 import { formatTimer, formatIsoToLocalTime } from "@/utils/format-helpers";
+import ConfirmDeleteModal from "@/components/ui/ConfirmDeleteModal";
 
 export default function PreviousTimers({
   onResume,
@@ -21,7 +24,35 @@ export default function PreviousTimers({
   const { sessions, removeSession, totalSecondsToday } =
     useTimerSessionsContext();
 
+  const [opened, { open, close }] = useDisclosure(false);
+  const [session, setSession] = useState<TimerSessionType | null>(null);
+
+  const handleOpenModal = (session: TimerSessionType) => {
+    setSession(session);
+    open();
+  };
+
+  const handleDeleteSession = () => {
+    if (session) {
+      removeSession(session.id);
+    }
+    close();
+  };
+
   if (sessions.length === 0) return null;
+
+  const descriptionText = session ? (
+    <>
+      <Text fw="bold">
+        {formatTimer(session.durationSec)}
+        {session.label && ` - ${session.label}`}
+      </Text>
+      <Text c="dimmed" fs="italic">
+        Are you sure you want to delete this timer? This action cannot be
+        undone.
+      </Text>
+    </>
+  ) : null;
 
   return (
     <>
@@ -32,6 +63,15 @@ export default function PreviousTimers({
         labelPosition="center"
         size="xs"
       />
+      {opened && (
+        <ConfirmDeleteModal
+          opened={opened}
+          close={close}
+          title="Delete timer?"
+          description={descriptionText}
+          onConfirm={handleDeleteSession}
+        />
+      )}
       <Stack gap="xs" mb="md">
         {sessions.map((session) => (
           <Group key={session.id} justify="space-between">
@@ -57,7 +97,7 @@ export default function PreviousTimers({
                 <ActionIcon
                   variant="transparent"
                   size="sm"
-                  onClick={() => removeSession(session.id)}
+                  onClick={() => handleOpenModal(session)}
                 >
                   <IconTrash />
                 </ActionIcon>
