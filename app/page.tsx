@@ -4,6 +4,7 @@ import QuickLinks from "@/components/quick-links/QuickLinks";
 import InputSection from "@/components/linker/InputSection";
 import PreviousLinks from "@/components/previous-links/PreviousLinks";
 import Dictionary from "@/components/dictionary/Dictionary";
+import Timer from "@/components/timer/Timer";
 import OtherLinks from "@/components/other-links/OtherLinks";
 import Footer from "@/components/layout/footer/Footer";
 
@@ -16,6 +17,7 @@ export default function Home() {
         <InputSection />
         <PreviousLinks />
         <Dictionary />
+        <Timer />
         <OtherLinks />
       </Paper>
       <Footer />
