@@ -128,20 +128,7 @@ export default function Dictionary() {
       )}
 
       {result && <Results result={result} key={result.word} />}
-      <Group justify="flex-end" align="center" mt="md" gap="xs" wrap="nowrap">
-        <Text
-          size="xs"
-          c="dimmed"
-          ta="right"
-          style={{
-            flex: "1 1 auto", // take remaining space
-            minWidth: 0, // IMPORTANT: allow text to shrink
-            wordBreak: "break-word", // wrap long strings
-          }}
-        >
-          Merriam-Webster® Intermediate (Grades 6-8): kid-friendly definitions &
-          synonyms
-        </Text>
+      <Group justify="flex-start" align="center" mt="md" gap="xs" wrap="nowrap">
         <Anchor
           href="https://www.merriam-webster.com"
           target="_blank"
@@ -157,7 +144,19 @@ export default function Dictionary() {
               fit="contain"
             />
           </Box>
-        </Anchor>
+        </Anchor>{" "}
+        <Text
+          c="dimmed"
+          fs="italic"
+          style={{
+            flex: "1 1 auto", // take remaining space
+            minWidth: 0, // IMPORTANT: allow text to shrink
+            wordBreak: "break-word", // wrap long strings
+          }}
+        >
+          Merriam-Webster® Intermediate (Grades 6-8): kid-friendly definitions &
+          synonyms
+        </Text>
       </Group>
     </>
   );
