@@ -5,6 +5,7 @@ import { theme } from "@/theme";
 import "@mantine/core/styles.css";
 import "./globals.css";
 import { SavedLinksContextProvider } from "@/store/settings";
+import { TimerSessionsProvider } from "@/store/timerSessions";
 
 export const viewport: Viewport = {
   minimumScale: 1,
@@ -52,10 +53,12 @@ export default function RootLayout({
       </head>
       <body>
         <SavedLinksContextProvider>
-          <MantineProvider theme={theme}>
-            {children}
-            <Analytics />
-          </MantineProvider>
+          <TimerSessionsProvider>
+            <MantineProvider theme={theme}>
+              {children}
+              <Analytics />
+            </MantineProvider>
+          </TimerSessionsProvider>
         </SavedLinksContextProvider>
       </body>
     </html>
