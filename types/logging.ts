@@ -8,4 +8,5 @@ export type EventName =
   | "link_suffix_submit"
   | "dictionary_lookup"
   | "external_link_click"
+  | "timer_action"
   | "unknown";

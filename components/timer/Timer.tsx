@@ -11,6 +11,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useInterval } from "@mantine/hooks";
+import { logUi } from "@/lib/logging/client-logging/logClient";
 import { useTimerSessionsContext } from "@/store/timerSessions";
 import { TimerSessionType } from "@/types/timer";
 import { formatTimer } from "@/utils/format-helpers";
@@ -46,6 +47,14 @@ export default function Timer() {
   useEffect(() => () => interval.stop(), [interval]);
 
   const startOrResume = () => {
+    if (!showTimer) {
+      const eventId = crypto.randomUUID();
+      void logUi(
+        "timer_action",
+        { action: "start", page: "/", component: "Timer" },
+        { eventId }
+      ).catch(() => {});
+    }
     setShowTimer(true);
     if (!startedAtRef.current) startedAtRef.current = new Date();
     runStartMsRef.current = Date.now();
@@ -94,6 +103,15 @@ export default function Timer() {
     if (durationSec <= 0) return;
 
     setSaving(true);
+
+    const action = editingId ? "update" : "create";
+    const eventId = crypto.randomUUID();
+    void logUi(
+      "timer_action",
+      { action, duration: durationSec, page: "/", component: "Timer" },
+      { eventId }
+    ).catch(() => {});
+
     try {
       // derive ended/start based on how you paused/loaded
       const endedAt =
@@ -155,6 +173,13 @@ export default function Timer() {
     startedAtRef.current = new Date(s.startedAt);
     endedAtRef.current = new Date(s.endedAt);
     runStartMsRef.current = null; // not started yet
+
+    const eventId = crypto.randomUUID();
+    void logUi(
+      "timer_action",
+      { action: "load", page: "/", component: "Timer" },
+      { eventId }
+    ).catch(() => {});
   };
 
   return (
