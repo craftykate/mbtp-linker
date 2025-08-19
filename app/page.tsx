@@ -1,4 +1,5 @@
 import { Container, Paper } from "@mantine/core";
+import PageVisitPing from "@/components/ui/PageVisitPing";
 import Header from "@/components/layout/header/Header";
 import QuickLinks from "@/components/quick-links/QuickLinks";
 import InputSection from "@/components/linker/InputSection";
@@ -11,6 +12,7 @@ import Footer from "@/components/layout/footer/Footer";
 export default function Home() {
   return (
     <Container size="sm" mt="md">
+      <PageVisitPing />
       <Paper shadow="xs" mb="md" p="md" withBorder>
         <Header />
         <QuickLinks />

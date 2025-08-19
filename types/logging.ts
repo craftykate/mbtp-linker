@@ -4,6 +4,7 @@ export type LogCategory = "event" | "error" | "perf" | "audit";
 export type Severity = "info" | "warn" | "error" | "critical";
 
 export type EventName =
+  | "page_view"
   | "button_click"
   | "link_suffix_submit"
   | "dictionary_lookup"
