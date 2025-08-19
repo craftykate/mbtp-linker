@@ -12,7 +12,7 @@ import Footer from "@/components/layout/footer/Footer";
 export default function Home() {
   return (
     <Container size="sm" mt="md">
-      <PageVisitPing />
+      <PageVisitPing afterInteraction />
       <Paper shadow="xs" mb="md" p="md" withBorder>
         <Header />
         <QuickLinks />
