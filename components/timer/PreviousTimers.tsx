@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  ActionIcon,
-  Divider,
-  Group,
-  Stack,
-  Text,
-  Tooltip,
-} from "@mantine/core";
+import { ActionIcon, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconTrash, IconClockPlay } from "@tabler/icons-react";
 import { useTimerSessionsContext } from "@/store/timerSessions";
@@ -56,13 +49,6 @@ export default function PreviousTimers({
 
   return (
     <>
-      <Divider
-        my="sm"
-        color="cyan"
-        label={<Text size="lg">Today&apos;s Timers</Text>}
-        labelPosition="center"
-        size="xs"
-      />
       {opened && (
         <ConfirmDeleteModal
           opened={opened}

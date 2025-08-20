@@ -241,6 +241,13 @@ export default function Timer() {
         )}
         {showTimer && <KeepScreenAwake />}
       </Stack>
+      <Divider
+        my="sm"
+        color="cyan"
+        label={<Text size="lg">Today&apos;s Timers</Text>}
+        labelPosition="center"
+        size="xs"
+      />
       <PreviousTimers
         onResume={handleResumeFromSession}
         loadDisabled={showTimer /* disable loading when any timer is active */}
