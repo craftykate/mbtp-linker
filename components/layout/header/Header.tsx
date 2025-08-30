@@ -1,6 +1,25 @@
-import { Paper, Text } from "@mantine/core";
+"use client";
+
+import { Anchor, Button, Paper, Text } from "@mantine/core";
+import { IconExternalLink } from "@tabler/icons-react";
+import { logUi } from "@/lib/logging/client-logging/logClient";
 
 export default function Header() {
+  const handleLogClick = (
+    type: "external_link_click" | "button_click",
+    link_id: string,
+    url: string,
+    label: string
+  ) => {
+    const eventId = crypto.randomUUID();
+    void logUi(
+      type,
+      { link_id, label, url, page: "/", component: "Header" },
+      { eventId }
+    ).catch(() => {});
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
   return (
     <>
       <Text
@@ -16,15 +35,41 @@ export default function Header() {
       <Paper withBorder p="md">
         <Text c="red" size="lg">
           <Text span fw="bold">
-            Coming soon!
-          </Text>{" "}
-          I&apos;m working on a NEW version of this site with lots more tools!
+            We&apos;ve moved!
+          </Text>
         </Text>
         <Text>
-          You&apos;ll also be able to log in (with a free account) and sync your
-          saved links and timers across devices! I&apos;ll add the link here
-          when it&apos;s ready for testing, which should be very soon.
+          Visit the new{" "}
+          <Anchor
+            href="https://homeroom-hub.vercel.app"
+            onClick={() =>
+              handleLogClick(
+                "external_link_click",
+                "homeroom-hub",
+                "https://homeroom-hub.vercel.app",
+                "Homeroom Hub"
+              )
+            }
+          >
+            Homeroom Hub
+          </Anchor>{" "}
+          - all the same kid-safe tools, now better than ever. Sync links and
+          timers across devices, with more features coming soon!
         </Text>
+        <Button
+          rightSection={<IconExternalLink size="16" />}
+          mt="md"
+          onClick={() =>
+            handleLogClick(
+              "button_click",
+              "homeroom-hub",
+              "https://homeroom-hub.vercel.app",
+              "Homeroom Hub"
+            )
+          }
+        >
+          Visit Homeroom Hub
+        </Button>
       </Paper>
     </>
   );
